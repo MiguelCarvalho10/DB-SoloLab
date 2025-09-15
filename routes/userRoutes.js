@@ -4,6 +4,23 @@ const bcrypt = require('bcrypt');
 
 const router = express.Router();
 
+// Atualizar usuário
+router.get('/', async (req, res) => {
+  const users = await User.find().select('-password');
+  res.json(users);
+});
+
+// Deletar usuário
+router.delete('/:id', async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Usuário deletado' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // Registrar usuário
 router.post('/register', async (req, res) => {
   try {
