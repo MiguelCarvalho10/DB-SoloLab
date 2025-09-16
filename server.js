@@ -10,9 +10,11 @@ app.use(express.json());
 // Rotas
 const userRoutes = require('./routes/userRoutes');
 const sensorRoutes = require('./routes/sensorRoutes');
+const accountRoutes = require('./routes/accountRoutes');
 
 app.use('/api/users', userRoutes);
 app.use('/api/sensors', sensorRoutes);
+app.use('/api/accounts', accountRoutes);
 
 // Conectar MongoDB
 mongoose.connect(process.env.MONGO_URI)

@@ -1,52 +1,36 @@
 const express = require('express');
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
-
 const router = express.Router();
-
-// Atualizar usuário
-router.get('/', async (req, res) => {
-  const users = await User.find().select('-password');
-  res.json(users);
-});
-
-// Deletar usuário
-router.delete('/:id', async (req, res) => {
-  try {
-    await User.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Usuário deletado' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 
 // Registrar usuário
 router.post('/register', async (req, res) => {
   try {
-    const { username, password } = req.body;
-
-    const user = new User({ username, password });
+    const { login, password, loginType } = req.body;
+    const user = new User({ login, password, loginType });
     await user.save();
-
-    res.status(201).json({ message: 'Usuário criado com sucesso!' });
+    res.status(201).json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+
+
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { login, password } = req.body;
 
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ login });
     if (!user) return res.status(400).json({ error: 'Usuário não encontrado' });
 
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) return res.status(400).json({ error: 'Senha incorreta' });
+    if (['email', 'phone'].includes(user.loginType)) {
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (!validPassword) return res.status(400).json({ error: 'Senha incorreta' });
+    }
 
-    res.json({ message: 'Login bem-sucedido!' });
+    res.json({ message: 'Login bem-sucedido!', userId: user._id, loginType: user.loginType });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
